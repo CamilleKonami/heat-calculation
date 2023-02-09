@@ -13,7 +13,7 @@ However, due to space constraints, it may not be possible to achieve this safe d
 
 Fire is considered as a radiating panel, located above the cooking facilities (oven/hob). The bottom edge of the panel is assumed to be 0.9m above finished floor level (typical kitchen unit height), with a width of "**a**"m (kitchen unit width) and a height of "**b**"m (flame height).
 
-Sprinklers are not considered when determining the **radiant heat from fire $Q$**, as the temperature of the heat source is assumed to be the maximum compartment temperature noted in BR 187, equating to a radiation intensity value of 168 kW/m².
+Sprinklers are not considered when determining the **radiant heat from fire $\dot{Q}$**, as the temperature of the heat source is assumed to be the maximum compartment temperature noted in BR 187, equating to a radiation intensity value of 168 kW/m².
 
 The determination of **FED**, on the other hand, takes into account the sprinkler effects, as the convective heat from the fire is not accounted for (sprinklers are expected to cool fire gas).
 
@@ -25,8 +25,7 @@ The determination of **FED**, on the other hand, takes into account the sprinkle
 
 ***FED:*** The cumulated heat doses, received during evacuation from the room, will trigger skin pain when it reaches FED = 1. To allow for uncertainties in response of more sensitive occupants to skin pain, this tenability limit may be reduced to 0.5 (elderly people, children).
 
-### Calculation of distance from fire for a given radiant heat flux
-exposure to radiative heat
+### Determine distance from fire for a given radiant heat flux
 
 The **radiant heat flux $\dot{Q}$** from a flame is given in PD 7974-1, by:
 $$\dot{Q}=\Phi.\varepsilon.\sigma.T^4$$
@@ -57,8 +56,8 @@ Where:
 - $b$: height of fire/flame (m)
 - $c$: distance from fire (m)
 
-The distance from fire c is the variable that is determined
+The distance from fire "c" is determined by solving : $\dot{Q}$ - tenability criteria = 0
 
 ### Calculation of FED along escape route
-The Tolerance time $t_{tolrad}$ (s) is given by:
+The Tolerance time $t_{tolrad}$ (s) is given by: 
 
