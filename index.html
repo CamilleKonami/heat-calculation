@@ -1,59 +1,86 @@
 <html>
+<style>
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+
+    img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .table {
+        font-size: 20px;
+        padding-left: 20px;
+    }
+</style>
+
 <body>
-  <table>
-    <tr>
-      <td>Température T (°C)</td>
-      <td><input type="number" id="inputTemp" value="1040" /></td>
-    </tr>
-    <tr>
-      <td>Largeur panneau radiant (m)</td>
-      <td><input type="number" id="inputWidth" value="0.52" /></td>
-    </tr>
-    <tr>
-      <td>Hauteur panneau radiant (m)</td>
-      <td><input type="number" id="inputHeight" value="1" /></td>
-    </tr>
-    <tr>
-      <td>critère tenabilité (kW/m²)</td>
-      <td><input type="number" id="lastFactor" value="2.5" /></td>
-    </tr>
-    <tr>
-      <td><button id="btn">Lancer le calcul</button></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Résultat : distance du feu (m)</td>
-      <td><input type="number" id="solution" disabled /></td>
-    </tr>
-  </table>
+    <h1>Exposure to radiant heat at a specific distance</h1>
+    <div class="container">
+        <div class="table">
+            <table>
+                <tr>
+                    <td>Temperature of source(°C)</td>
+                    <td><input type="number" id="inputTemp" value="1040" /></td>
+                </tr>
+                <tr>
+                    <td>Width of fire <font color="#FF0000">a</font> (m)</td>
+                    <td><input type="number" id="inputWidth" value="0.52" /></td>
+                </tr>
+                <tr>
+                    <td>Height of fire <font color="#FF0000">b</font> (m)</td>
+                    <td><input type="number" id="inputHeight" value="1" /></td>
+                </tr>
+                <tr>
+                    <td>Tenability criteria (kW/m²)</td>
+                    <td><input type="number" id="tenability" value="2.5" /></td>
+                </tr>
+                <tr>
+                    <td><button id="btn">Launch calculation</button></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Result : distance to fire <font color="#FF0000">c</font> (m)</td>
+                    <td><input type="number" id="solution" disabled /></td>
+                </tr>
+            </table>
+        </div>
+        <div class="image">
+            <img src="picture2.jpg" alt="radiating panel" style="float:right;width:300px;height:300px;">
+        </div>
+    </div>
 </body>
 <script>
-  function QHeatEquation(inputTemp, inputWidth, inputHeight, lastFactor, x) {
-    const a = inputWidth;
-    const b = inputHeight;
-    const X = a / (2 * x);
-    const Y = b / (2 * x);
-    const viewConf = 2 / Math.PI * (X / Math.sqrt(1 + Math.pow(X, 2)) * Math.atan(Y / Math.sqrt(1 + Math.pow(X, 2))) + Y / Math.sqrt(1 + Math.pow(Y, 2)) * Math.atan(X / Math.sqrt(1 + Math.pow(Y, 2))));
-    const em = 1 - Math.exp(-0.3 * inputWidth);
-    const Temp = inputTemp + 273;
-    const sigma = 5.67 * Math.pow(10, -11);
-    const Qheat = viewConf * em * sigma * Math.pow(Temp, 4);
-    return Qheat - lastFactor;
-  }
-
-  // Lors d'un clic sur le bouton
-  document.getElementById("btn").addEventListener("click", () => {
-    // On cherche la solution en 0 et 100 en incrémentant de 0.01
-    for (let i = 0; i < 100; i += 0.01) {
-      const result = QHeatEquation(document.getElementById("inputTemp").valueAsNumber,
-        document.getElementById("inputWidth").valueAsNumber,
-        document.getElementById("inputHeight").valueAsNumber,
-        document.getElementById("lastFactor").valueAsNumber, i);
-      if (result < 0) {
-        document.getElementById("solution").valueAsNumber = (i - 0.01).toFixed(2);
-        break;
-      }
+    function QHeatEquation(inputTemp, inputWidth, inputHeight, tenability, x) {
+        const a = inputWidth;
+        const b = inputHeight;
+        const X = a / (2 * x);
+        const Y = b / (2 * x);
+        const viewConf = 2 / Math.PI * (X / Math.sqrt(1 + Math.pow(X, 2)) * Math.atan(Y / Math.sqrt(1 + Math.pow(X, 2))) + Y / Math.sqrt(1 + Math.pow(Y, 2)) * Math.atan(X / Math.sqrt(1 + Math.pow(Y, 2))));
+        const em = 1 - Math.exp(-0.3 * inputWidth);
+        const Temp = inputTemp + 273;
+        const sigma = 5.67 * Math.pow(10, -11);
+        const Qheat = viewConf * em * sigma * Math.pow(Temp, 4);
+        return Qheat - tenability;
     }
-  });
+
+    // Lors d'un clic sur le bouton
+    document.getElementById("btn").addEventListener("click", () => {
+        // On cherche la solution en 0 et 100 en incrémentant de 0.01
+        for (let i = 0; i < 100; i += 0.01) {
+            const result = QHeatEquation(document.getElementById("inputTemp").valueAsNumber,
+                document.getElementById("inputWidth").valueAsNumber,
+                document.getElementById("inputHeight").valueAsNumber,
+                document.getElementById("tenability").valueAsNumber, i);
+            if (result < 0) {
+                document.getElementById("solution").valueAsNumber = (i - 0.01).toFixed(2);
+                break;
+            }
+        }
+    });
 </script>
+
 </html>
