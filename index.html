@@ -211,7 +211,7 @@
             const cell2 = row.insertCell();
             const cell3 = row.insertCell();
             const text1 = document.createTextNode("t" + i);
-            const text2 = document.createTextNode(i * timestep);
+            const text2 = document.createTextNode((i * timestep).toFixed(1));
             const input = document.createElement("input");
             input.type = "number";
             input.id = "t" + i;
