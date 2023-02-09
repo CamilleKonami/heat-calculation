@@ -5,7 +5,7 @@ This tool calculates 1) the distance at which is received a specific radiant hea
 
 ### Why?
 As a best practice, it is recommended to provide a separation distance of 1.8m between kitchen hob and internal escape routes within bedrooms/flats.
-However, due to space constraints, it may not be possible to achieve this safe distance of 1.8m between. 
+However, due to space constraints, it may not be possible to achieve this safe distance and the occupant will pass by the burning kitchen.
 
 ### Fire scenario and assumptions
 
