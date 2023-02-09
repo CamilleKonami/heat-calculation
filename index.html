@@ -234,7 +234,7 @@
         const Temp = inputTemp + 273;
         const sigma = 5.67 * Math.pow(10, -11);
         const Qheat = viewConf * em * sigma * Math.pow(Temp, 4);
-        return (1.33/Math.pow(Qheat,1.33))*60
+        return (1.33 / Math.pow(Qheat, 1.33)) * 60
     }
 
     document.getElementById("calculateFED").addEventListener("click", () => {
@@ -257,7 +257,7 @@
         }
         let sumFED = 0;
         for (let i = 1; i < ttolrads.length; i++) {
-            sumFED += (1/ttolrads[i])*(timestep * i - timestep * (i-1))
+            sumFED += (1 / ttolrads[i]) * (timestep * i - timestep * (i - 1))
         }
         document.getElementById("sumFED").valueAsNumber = sumFED.toFixed(3)
     })
