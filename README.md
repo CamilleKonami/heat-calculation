@@ -1,13 +1,11 @@
 # heat-calculation
 ## Performance-based approach for cooker location in flats
 
-This tool calculates the distance at which is received a specific radiant heat flux.
+This tool calculates 1) the distance at which is received a specific radiant heat flux and 2) the radiative FED received along an escape route.
 
 ### Why?
 As a best practice, it is recommended to provide a separation distance of 1.8m between kitchen hob and internal escape routes within bedrooms/flats.
-However, due to space constraints, it may not be possible to achieve this safe distance of 1.8m between. This tool determines:
-- what is the minimum distance from fire to maintain a given tenability criteria
-- what is the total radiation FED received during evacuation.
+However, due to space constraints, it may not be possible to achieve this safe distance of 1.8m between. 
 
 ### Fire scenario and assumptions
 
@@ -25,7 +23,7 @@ The determination of **FED**, on the other hand, takes into account the sprinkle
 
 ***FED:*** The cumulated heat doses, received during evacuation from the room, will trigger skin pain when it reaches FED = 1. To allow for uncertainties in response of more sensitive occupants to skin pain, this tenability limit may be reduced to 0.5 (elderly people, children).
 
-### Determine distance from fire for a given radiant heat flux
+### Distance from fire for a given radiant heat flux
 
 The **radiant heat flux $\dot{Q}$** from a flame is given in PD 7974-1, by:
 $$\dot{Q}=\Phi.\varepsilon.\sigma.T^4$$
@@ -37,7 +35,7 @@ Where:
 - $T$: absolute temperature of the radiating object (K). Assumed to be 1040°C (max compartment T° equating to radiation intensity of 168kW/m²).
 
 The **emissivity of the flame** $\varepsilon$ is given in BS EN 1991-1-2 and BR 187 by:
-$$\varepsilon=1-exp(-0.3d)$$
+$$\varepsilon=1-\mathrm{e}^{-0.3d}\$$
 Where:
 -  $d$ is the flame thickness (corresponding to width of radiating panel)
 
@@ -59,5 +57,13 @@ Where:
 The distance from fire "c" is determined by solving : $\dot{Q}$ - tenability criteria = 0
 
 ### Calculation of FED along escape route
-The Tolerance time $t_{tolrad}$ (s) is given by: 
+The tolerance time $t_{tolrad}$ (s) is given by: 
+$$t_{tolrad}=\frac{r}{\dot{Q}^{1.33}}$$
+Where:
+- $r$: severe pain occurs when the “exposure dose” of radiant heat is approximately r = 1.33 to 1.67 $(kW/m^2)^{1.33}.min$
+- $\dot{Q}$ : is the radiant heat flux kW/m² received by occupant.
 
+Points are positioned on the escape route at every timestep $dt$ to indicate position of occupant in relation to fire during evacuation. 
+The radiant heat flux $\dot{Q}$ and the tolerance time $t_{tolrad}$ are calculated at each point.
+The **FED (Fractional Effective Dose)**, i.e. the doses of heat acquired during the total exposure period $t$, is determined by summing the fractions of heat doses acquired during the successive short periods (timesteps), and compared to the tenability limit of FED = 1. 
+$$FED=\int_0^t \frac{1}{t_{tolrad}}\mathrm{d}t$$
