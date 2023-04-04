@@ -18,7 +18,7 @@
 </style>
 
 <body>
-    <h1>Exposure to radiant heat at a specific distance</h1>
+    <h2>Exposure to radiant heat at a specific distance</h2>
     <div class="container">
         <div class="table">
             <table>
@@ -49,7 +49,109 @@
             </table>
         </div>
         <div class="image">
-            <img src="https://user-images.githubusercontent.com/24531246/217807536-536a3a4a-31a3-4ba2-a102-d07e6b319c4a.jpg" alt="radiating panel" style="float:right;width:300px;height:300px;">
+            <img src="https://user-images.githubusercontent.com/24531246/217807536-536a3a4a-31a3-4ba2-a102-d07e6b319c4a.jpg"
+                alt="radiating panel" style="float:right;width:300px;height:300px;">
+        </div>
+    </div>
+    <h2>FED Calculation</h2>
+    <div class="container">
+        <div class="table">
+            <table>
+                <tr>
+                    <td>Total travel distance (m)</td>
+                    <td><input type="number" id="totalTravelDistance" value="6" /></td>
+                </tr>
+                <tr>
+                    <td>Timestep (s)</td>
+                    <td><input type="number" id="timestep" value="0.5" /></td>
+                </tr>
+                <tr>
+                    <td>Walking speed (m/s)</td>
+                    <td><input type="number" id="walkingSpeed" value="1" /></td>
+                </tr>
+                <tr>
+                    <td><button id="createInputTableButton">Create input table</button></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="container">
+        <div class="table">
+            <table id="input-table">
+                <tbody>
+                    <tr>
+                        <th>points</th>
+                        <th>time (s)</th>
+                        <th>distance to fire (m)</th>
+                    </tr>
+                    <tr>
+                        <td>t0</td>
+                        <td>0</td>
+                        <td><input type="number" id="t0"></td>
+                    </tr>
+                    <tr>
+                        <td>t1</td>
+                        <td>0.5</td>
+                        <td><input type="number" id="t1"></td>
+                    </tr>
+                    <tr>
+                        <td>t2</td>
+                        <td>1</td>
+                        <td><input type="number" id="t2"></td>
+                    </tr>
+                    <tr>
+                        <td>t3</td>
+                        <td>1.5</td>
+                        <td><input type="number" id="t3"></td>
+                    </tr>
+                    <tr>
+                        <td>t4</td>
+                        <td>2</td>
+                        <td><input type="number" id="t4"></td>
+                    </tr>
+                    <tr>
+                        <td>t5</td>
+                        <td>2.5</td>
+                        <td><input type="number" id="t5"></td>
+                    </tr>
+                    <tr>
+                        <td>t6</td>
+                        <td>3</td>
+                        <td><input type="number" id="t6"></td>
+                    </tr>
+                    <tr>
+                        <td>t7</td>
+                        <td>3.5</td>
+                        <td><input type="number" id="t7"></td>
+                    </tr>
+                    <tr>
+                        <td>t8</td>
+                        <td>4</td>
+                        <td><input type="number" id="t8"></td>
+                    </tr>
+                    <tr>
+                        <td>t9</td>
+                        <td>4.5</td>
+                        <td><input type="number" id="t9"></td>
+                    </tr>
+                    <tr>
+                        <td>t10</td>
+                        <td>5</td>
+                        <td><input type="number" id="t10"></td>
+                    </tr>
+                    <tr>
+                        <td>t11</td>
+                        <td>5.5</td>
+                        <td><input type="number" id="t11"></td>
+                    </tr>
+                    <tr>
+                        <td>t12</td>
+                        <td>6</td>
+                        <td><input type="number" id="t12"></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
@@ -81,6 +183,44 @@
             }
         }
     });
+
+    document.getElementById("createInputTableButton").addEventListener("click", () => {
+        // On vide le contenu
+        const table = document.getElementById('input-table');
+        table.innerHTML = '';
+
+        // On crée le tableau
+        const row = table.insertRow();
+        const titles = ['points', "time (s)", "distance to fire (m)"];
+        for (let i = 0; i < titles.length; i++) {
+            const th = document.createElement("th");
+            const text = document.createTextNode(titles[i]);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+        const totalTravelDistance = document.getElementById("totalTravelDistance").valueAsNumber;
+        const timestep = document.getElementById("timestep").valueAsNumber;
+        const walkingSpeed = document.getElementById("walkingSpeed").valueAsNumber;
+
+        const timeslot = totalTravelDistance / walkingSpeed;
+        const rowsLength = Math.ceil(timeslot / timestep) + 1;
+
+        for (let i = 0; i < rowsLength; i++) {
+            const row = table.insertRow();
+            const cell1 = row.insertCell();
+            const cell2 = row.insertCell();
+            const cell3 = row.insertCell();
+            const text1 = document.createTextNode("t" + i);
+            const text2 = document.createTextNode((i * timestep).toFixed(1));
+            const input = document.createElement("input");
+            input.type = "number";
+            input.id = "t" + i;
+            cell1.appendChild(text1);
+            cell2.appendChild(text2);
+            cell3.appendChild(input);
+        }
+
+    })
 </script>
 
 </html>
