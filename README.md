@@ -1,7 +1,7 @@
 # heat-calculation
 ## Performance-based approach for cooker location in flats
 
-This tool calculates 1) the distance at which is received a specific radiant heat flux and 2) the radiative FED received along an escape route.
+This tool calculates 1) the distance at which is received a specific radiant heat flux and 2) the radiative FED received along an escape route. Two radiation models are available for comparison: a **rectangular panel (solid flame) model** and a **point source model**.
 
 ### Why?
 As a best practice, it is recommended to provide a separation distance of 1.8m between kitchen hob and internal escape routes within bedrooms/flats.
@@ -23,7 +23,7 @@ The determination of **FED**, on the other hand, takes into account the sprinkle
 
 ***FED:*** The cumulated heat doses, received during evacuation from the room, will trigger skin pain when it reaches FED = 1. To allow for uncertainties in response of more sensitive occupants to skin pain, this tenability limit may be reduced to 0.5 (elderly people, children).
 
-### Distance from fire for a given radiant heat flux
+### Model 1: Rectangular panel (solid flame) — Distance from fire for a given radiant heat flux
 
 The **radiant heat flux $\dot{Q}$** from a flame is given in PD 7974-1, by:
 $$\dot{Q}=\Phi.\varepsilon.\sigma.T^4$$
@@ -39,12 +39,12 @@ $$\varepsilon=1-\mathrm{e}^{-0.3d}\$$
 Where:
 -  $d$ is the flame thickness (corresponding to width of radiating panel)
 
-**Calculation of the view factor F :**
-the flame is approximated to be a rectangle shape for a parallel plane to a point. From equation noted in SFPE Handbook for Fire Protection Engineering 5th Edition Figure A-2:
+**Calculation of the view factor $\Phi$ :**
+The flame is approximated to be a rectangle shape. The view factor from the centre of a rectangular panel to a point on a parallel plane is obtained by applying 4 times the corner-point formula from SFPE Handbook for Fire Protection Engineering 5th Edition Figure A-2:
 
 ![Picture1](https://user-images.githubusercontent.com/24531246/217807536-536a3a4a-31a3-4ba2-a102-d07e6b319c4a.jpg)
 
-$$\Phi=\frac{1}{2\pi}\left[\frac{X}{\sqrt{1+X^2}}.\tan^{-1}\left(\frac{Y}{\sqrt{1+X^2}}\right)+\frac{Y}{\sqrt{1+Y^2}}.\tan^{-1}\left(\frac{X}{\sqrt{1+Y^2}}\right)\right]$$
+$$\Phi=\frac{2}{\pi}\left[\frac{X}{\sqrt{1+X^2}}.\tan^{-1}\left(\frac{Y}{\sqrt{1+X^2}}\right)+\frac{Y}{\sqrt{1+Y^2}}.\tan^{-1}\left(\frac{X}{\sqrt{1+Y^2}}\right)\right]$$
 
 
 $$X=\frac{a}{2c}$$
@@ -55,6 +55,21 @@ Where:
 - $c$: distance from fire (m)
 
 The distance from fire "c" is determined by solving : $\dot{Q}$ - tenability criteria = 0
+
+### Model 2: Point source — Distance from fire for a given radiant heat flux
+
+As an alternative to the rectangular panel model, the **point source model** treats the fire as a single radiating point. It is simpler and has been shown to provide an adequate approach for kitchen hob fires (Spearpoint, Hopkin & Hopkin, 2020).
+
+The **radiant heat flux** received at distance $R$ from the fire is:
+$$\dot{Q}=\frac{\chi_r \cdot \dot{Q}_{HRR}}{4\pi R^2}$$
+Where:
+- $\dot{Q}$: radiant heat flux in kW/m²
+- $\chi_r$: radiative fraction (typically 0.3)
+- $\dot{Q}_{HRR}$: heat release rate of the fire (kW)
+- $R$: distance from the flame centre to the receiver (m)
+
+The distance from fire for a given tenability threshold $q$ has a **closed-form solution**:
+$$R=\sqrt{\frac{\chi_r \cdot \dot{Q}_{HRR}}{4\pi \cdot q}}$$
 
 ### Calculation of FED along escape route
 The tolerance time $t_{tolrad}$ (s) is given by: 

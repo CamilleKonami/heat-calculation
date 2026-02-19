@@ -39,12 +39,24 @@
                     <td><input type="number" id="tenability" value="2.5" /></td>
                 </tr>
                 <tr>
+                    <td>Heat release rate (kW) <i>— point source</i></td>
+                    <td><input type="number" id="inputHRR" value="250" /></td>
+                </tr>
+                <tr>
+                    <td>Radiative fraction χ<sub>r</sub> <i>— point source</i></td>
+                    <td><input type="number" id="inputChiR" value="0.3" step="0.05" /></td>
+                </tr>
+                <tr>
                     <td><button id="btn">Launch calculation</button></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td>Result : distance to fire <font color="#FF0000">c</font> (m)</td>
+                    <td>Rectangular panel: distance <font color="#FF0000">c</font> (m)</td>
                     <td><input type="number" id="solution" disabled /></td>
+                </tr>
+                <tr>
+                    <td>Point source: distance <font color="#FF0000">c</font> (m)</td>
+                    <td><input type="number" id="solutionPointSource" disabled /></td>
                 </tr>
             </table>
         </div>
@@ -153,7 +165,8 @@
                 </tbody>
             </table>
             <button id="calculateFED">Calculate FED</button>
-            <input type="number" id="sumFED" disabled />
+            <br>Rectangular panel: <input type="number" id="sumFED" disabled />
+            <br>Point source: <input type="number" id="sumFEDPointSource" disabled />
         </div>
     </div>
 </body>
@@ -171,9 +184,19 @@
         return Qheat - tenability;
     }
 
+    // Point source model: q = (χr · Q) / (4πR²)
+    function QHeatPointSource(inputHRR, inputChiR, distance) {
+        return (inputChiR * inputHRR) / (4 * Math.PI * Math.pow(distance, 2));
+    }
+
+    function getTtolradPointSource(inputHRR, inputChiR, distance) {
+        const Qheat = QHeatPointSource(inputHRR, inputChiR, distance);
+        return (1.33 / Math.pow(Qheat, 1.33)) * 60;
+    }
+
     // Lors d'un clic sur le bouton
     document.getElementById("btn").addEventListener("click", () => {
-        // On cherche la solution en 0 et 100 en incrémentant de 0.01
+        // Rectangular panel model: On cherche la solution en 0 et 100 en incrémentant de 0.01
         for (let i = 0; i < 100; i += 0.01) {
             const result = QHeatEquation(document.getElementById("inputTemp").valueAsNumber,
                 document.getElementById("inputWidth").valueAsNumber,
@@ -184,6 +207,12 @@
                 break;
             }
         }
+        // Point source model: closed-form solution R = sqrt(χr·Q / (4π·q))
+        const inputHRR = document.getElementById("inputHRR").valueAsNumber;
+        const inputChiR = document.getElementById("inputChiR").valueAsNumber;
+        const tenability = document.getElementById("tenability").valueAsNumber;
+        const distancePS = Math.sqrt((inputChiR * inputHRR) / (4 * Math.PI * tenability));
+        document.getElementById("solutionPointSource").valueAsNumber = distancePS.toFixed(2);
     });
 
     document.getElementById("createInputTableButton").addEventListener("click", () => {
@@ -191,6 +220,7 @@
         const table = document.getElementById('input-table');
         table.innerHTML = '';
         document.getElementById("sumFED").value = '';
+        document.getElementById("sumFEDPointSource").value = '';
 
         // On crée le tableau
         const row = table.insertRow();
@@ -241,9 +271,11 @@
     document.getElementById("calculateFED").addEventListener("click", () => {
         const timestep = document.getElementById("timestep").valueAsNumber;
         const table = document.getElementById('input-table');
-        const temps = [];
+        const inputHRR = document.getElementById("inputHRR").valueAsNumber;
+        const inputChiR = document.getElementById("inputChiR").valueAsNumber;
         const distances = [];
         const ttolrads = [];
+        const ttolradsPS = [];
         for (let i = 1, row; row = table.rows[i]; i++) {
             const value = row.cells[2].childNodes[0].valueAsNumber
             if (isNaN(value)) {
@@ -255,12 +287,16 @@
                 document.getElementById("inputWidth").valueAsNumber,
                 document.getElementById("inputHeight").valueAsNumber,
                 value));
+            ttolradsPS.push(getTtolradPointSource(inputHRR, inputChiR, value));
         }
         let sumFED = 0;
+        let sumFEDPS = 0;
         for (let i = 1; i < ttolrads.length; i++) {
             sumFED += (1 / ttolrads[i]) * (timestep * i - timestep * (i - 1))
+            sumFEDPS += (1 / ttolradsPS[i]) * (timestep * i - timestep * (i - 1))
         }
         document.getElementById("sumFED").valueAsNumber = sumFED.toFixed(3)
+        document.getElementById("sumFEDPointSource").valueAsNumber = sumFEDPS.toFixed(3)
     })
 </script>
 
