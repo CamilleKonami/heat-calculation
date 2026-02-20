@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react';
-import { Stack, Group, NumberInput, Button, Title, Text } from '@mantine/core';
+import { Stack, Group, NumberInput, Button, Title, Text, Switch } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import type { RadiationInputs, FedInputs, FedTimestepEntry, FedResult } from '../lib/types.ts';
 import { computeBothFed } from '../lib/fed.ts';
+import { generateEntries } from '../lib/geometry.ts';
 import { FedTable } from './FedTable.tsx';
 import { FedChart } from './FedChart.tsx';
+import { CorridorDiagram } from './CorridorDiagram.tsx';
+import { DistanceProfileChart } from './DistanceProfileChart.tsx';
 
 interface FedSectionProps {
   radiationInputs: RadiationInputs;
@@ -15,39 +18,31 @@ interface FedSectionProps {
 export function FedSection({ radiationInputs, fedInputs, onFedInputsChange }: FedSectionProps) {
   const [entries, setEntries] = useState<FedTimestepEntry[]>([]);
   const [fedResult, setFedResult] = useState<FedResult | null>(null);
+  const [advancedMode, setAdvancedMode] = useState(false);
+  const [manuallyEdited, setManuallyEdited] = useState(false);
 
   function updateInput(field: keyof FedInputs, value: string | number) {
     onFedInputsChange({ ...fedInputs, [field]: Number(value) });
   }
 
-  function createTable() {
-    const { totalTravelDistance, timestep, walkingSpeed } = fedInputs;
-    const timeslot = totalTravelDistance / walkingSpeed;
-    const rowCount = Math.ceil(timeslot / timestep) + 1;
+  function calculateFed() {
+    const generated = generateEntries(fedInputs);
+    setEntries(generated);
+    setManuallyEdited(false);
 
-    const newEntries: FedTimestepEntry[] = [];
-    for (let i = 0; i < rowCount; i++) {
-      newEntries.push({
-        index: i,
-        time: Math.round(i * timestep * 10) / 10,
-        distanceToFire: null,
-      });
-    }
-    setEntries(newEntries);
-    setFedResult(null);
+    const result = computeBothFed(
+      generated,
+      fedInputs.timestep,
+      radiationInputs.temperature,
+      radiationInputs.width,
+      radiationInputs.height,
+      radiationInputs.hrr,
+      radiationInputs.chiR,
+    );
+    setFedResult(result);
   }
 
-  const handleDistanceChange = useCallback((index: number, value: number | string) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.index === index
-          ? { ...e, distanceToFire: typeof value === 'number' ? value : null }
-          : e,
-      ),
-    );
-  }, []);
-
-  function calculateFed() {
+  function recalculate() {
     const hasEmpty = entries.some((e) => e.distanceToFire === null);
     if (hasEmpty) {
       notifications.show({
@@ -68,11 +63,50 @@ export function FedSection({ radiationInputs, fedInputs, onFedInputsChange }: Fe
       radiationInputs.chiR,
     );
     setFedResult(result);
+    setManuallyEdited(false);
   }
+
+  const handleDistanceChange = useCallback((index: number, value: number | string) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.index === index
+          ? { ...e, distanceToFire: typeof value === 'number' ? value : null }
+          : e,
+      ),
+    );
+    setManuallyEdited(true);
+  }, []);
 
   return (
     <Stack>
       <Title order={2}>FED Calculation</Title>
+
+      <CorridorDiagram
+        lateralDistance={fedInputs.lateralDistance}
+        passbyOffset={fedInputs.passbyOffset}
+        totalTravelDistance={fedInputs.totalTravelDistance}
+      />
+
+      <Group>
+        <NumberInput
+          label="Lateral distance (m)"
+          description="Perpendicular distance from path to fire"
+          value={fedInputs.lateralDistance}
+          onChange={(v) => updateInput('lateralDistance', v)}
+          decimalScale={2}
+          step={0.1}
+          min={0.1}
+        />
+        <NumberInput
+          label="Pass-by offset (m)"
+          description="Distance along path to closest approach"
+          value={fedInputs.passbyOffset}
+          onChange={(v) => updateInput('passbyOffset', v)}
+          decimalScale={2}
+          step={0.5}
+          min={0}
+        />
+      </Group>
       <Group>
         <NumberInput
           label="Total travel distance (m)"
@@ -94,21 +128,15 @@ export function FedSection({ radiationInputs, fedInputs, onFedInputsChange }: Fe
           step={0.1}
         />
       </Group>
-      <Button onClick={createTable} variant="outline" w="fit-content">
-        Create input table
+
+      <Button onClick={calculateFed} w="fit-content">
+        Calculate FED
       </Button>
 
-      {entries.length > 0 && (
+      {entries.length > 0 && fedResult && (
         <>
-          <FedTable entries={entries} onChange={handleDistanceChange} />
-          <Button onClick={calculateFed} w="fit-content">
-            Calculate FED
-          </Button>
-        </>
-      )}
+          <DistanceProfileChart entries={entries} />
 
-      {fedResult && (
-        <>
           <Group>
             <NumberInput
               label={<Text fw={500}>Rectangular panel FED</Text>}
@@ -123,7 +151,25 @@ export function FedSection({ radiationInputs, fedInputs, onFedInputsChange }: Fe
               variant="filled"
             />
           </Group>
+
           <FedChart result={fedResult} />
+
+          <Switch
+            label="Advanced: edit distances manually"
+            checked={advancedMode}
+            onChange={(event) => setAdvancedMode(event.currentTarget.checked)}
+          />
+
+          {advancedMode && (
+            <>
+              <FedTable entries={entries} onChange={handleDistanceChange} />
+              {manuallyEdited && (
+                <Button onClick={recalculate} variant="outline" w="fit-content">
+                  Recalculate
+                </Button>
+              )}
+            </>
+          )}
         </>
       )}
     </Stack>

@@ -51,7 +51,8 @@ export function pointSourceHeatFlux(hrr: number, chiR: number, distance: number)
 
 /**
  * Find distance where rectangular panel heat flux drops below tenability.
- * Linear search from 0.01m to 100m in 0.01m increments (matches legacy behavior).
+ * Binary search on [0.01, 100] — heat flux is monotonically decreasing with distance.
+ * Returns the last distance (rounded to 0.01m) where flux >= tenability.
  */
 export function findRectangularPanelDistance(
   temperatureC: number,
@@ -59,13 +60,27 @@ export function findRectangularPanelDistance(
   height: number,
   tenability: number,
 ): number {
-  for (let x = 0.01; x < 100; x += 0.01) {
-    const flux = rectangularPanelHeatFlux(temperatureC, width, height, x);
-    if (flux < tenability) {
-      return Math.round((x - 0.01) * 100) / 100;
+  // If flux is already below tenability at the minimum distance, return 0
+  if (rectangularPanelHeatFlux(temperatureC, width, height, 0.01) < tenability) {
+    return 0;
+  }
+
+  let lo = 0.01;
+  let hi = 100;
+
+  // Binary search: find the boundary where flux crosses below tenability
+  while (hi - lo > 0.001) {
+    const mid = (lo + hi) / 2;
+    const flux = rectangularPanelHeatFlux(temperatureC, width, height, mid);
+    if (flux >= tenability) {
+      lo = mid;
+    } else {
+      hi = mid;
     }
   }
-  return 100;
+
+  // Round down to nearest 0.01m (last distance where flux >= tenability)
+  return Math.floor(lo * 100) / 100;
 }
 
 /**

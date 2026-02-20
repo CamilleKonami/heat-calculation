@@ -17,6 +17,8 @@ const defaultFedInputs: FedInputs = {
   totalTravelDistance: 6,
   timestep: 0.5,
   walkingSpeed: 1,
+  lateralDistance: 1.5,
+  passbyOffset: 3,
 };
 
 export function App() {

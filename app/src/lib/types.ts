@@ -20,6 +20,10 @@ export interface FedInputs {
   timestep: number;
   /** Walking speed (m/s) */
   walkingSpeed: number;
+  /** Perpendicular distance from walking path to fire (m) */
+  lateralDistance: number;
+  /** Distance along path from start to the point of closest approach to fire (m) */
+  passbyOffset: number;
 }
 
 export interface FedTimestepEntry {
