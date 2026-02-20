@@ -8,13 +8,31 @@ A fire safety engineering calculator that determines safe distances between kitc
 
 ## Architecture
 
-Single-file vanilla HTML/CSS/JavaScript application (`index.html`, ~265 lines). No build system, no dependencies, no frameworks. Open the file directly in a browser to use.
+### React app (`app/`)
 
-### Two calculation sections:
+React 18 + TypeScript + Vite + Mantine v8 + Plotly.js application.
 
-1. **Radiant heat distance** (lines 21-55, JS function `QHeatEquation`): Given fire temperature, dimensions, and a tenability threshold, finds the distance where radiant heat drops below the threshold. Uses linear search from 0-100m in 0.01m increments.
+**Key directories:**
+- `app/src/lib/` — Pure physics functions (radiation.ts, fed.ts) with shared types and constants
+- `app/src/components/` — React components for each section
+- `app/src/lib/plotly.ts` — Plotly wrapper using the basic bundle for smaller size
 
-2. **FED along escape route** (lines 56-158, JS functions `getTtolrad` + FED summation): User specifies travel distance, timestep, and walking speed to generate a table. Each row takes a distance-to-fire input. Calculates cumulative FED over the evacuation path.
+**Physics modules** (`app/src/lib/`):
+- `radiation.ts` — viewFactor, emissivity, rectangularPanelHeatFlux, pointSourceHeatFlux, findDistance functions
+- `fed.ts` — toleranceTime, computeFed (generic with heat flux callback), computeBothFed
+- `constants.ts` — Stefan-Boltzmann constant, absorption coefficient
+- `types.ts` — Shared TypeScript interfaces
+
+**Components** (`app/src/components/`):
+- `RadiantHeatSection.tsx` — Section 1: radiant heat distance calculation with inputs and results
+- `FedSection.tsx` — Section 2: FED calculation with dynamic table generation
+- `FedTable.tsx` — Editable timestep table for distance-to-fire inputs
+- `HeatFluxChart.tsx` — Plotly chart: heat flux vs distance (both models + tenability line)
+- `FedChart.tsx` — Plotly chart: cumulative FED vs time (both models + threshold lines)
+
+### Legacy (`index.html`)
+
+Single-file vanilla HTML/CSS/JavaScript application kept as reference. Open directly in a browser.
 
 ### Key physics formulas implemented:
 
@@ -24,13 +42,16 @@ Single-file vanilla HTML/CSS/JavaScript application (`index.html`, ~265 lines). 
 - Tolerance time: t_tolrad = 1.33 / Q^1.33 (converted to seconds)
 - FED: Σ (1/t_tolrad) · dt
 
-### Shared calculation logic
-
-`QHeatEquation` and `getTtolrad` both compute view factor, emissivity, and radiant heat flux with duplicated code. Both share inputs from Section 1 (temperature, width, height).
-
 ## Development
 
-No build or test commands. To work on this project, edit `index.html` and open it in a browser. All CSS is in `<style>` tags and all JS is in a `<script>` block at the end of the file.
+```bash
+cd app
+npm install          # Install dependencies
+npm run dev          # Start dev server
+npm run build        # Production build (tsc + vite build)
+npx vitest           # Run unit tests (watch mode)
+npx vitest run       # Run unit tests (single run)
+```
 
 ## Conventions
 

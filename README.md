@@ -3,6 +3,18 @@
 
 This tool calculates 1) the distance at which is received a specific radiant heat flux and 2) the radiative FED received along an escape route. Two radiation models are available for comparison: a **rectangular panel (solid flame) model** and a **point source model**.
 
+### Getting started
+
+The application lives in the `app/` directory (React + TypeScript + Vite + Mantine + Plotly.js).
+
+```bash
+cd app
+npm install
+npm run dev       # Start dev server at http://localhost:5173
+npm run build     # Production build
+npx vitest run    # Run unit tests
+```
+
 ### Why?
 As a best practice, it is recommended to provide a separation distance of 1.8m between kitchen hob and internal escape routes within bedrooms/flats.
 However, due to space constraints, it may not be possible to achieve this safe distance and the occupant will pass by the burning kitchen.
